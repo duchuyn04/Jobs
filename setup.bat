@@ -9,11 +9,14 @@ echo.
 ::Kiểm tra Go
 where go >nul 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo [...] Go chua duoc cai. Dang cai tu dong...
+    echo [...] Go chua duoc cai. Dang cai tu dong qua winget...
     winget install -e --id GoLang.Go --silent --accept-source-agreements --accept-package-agreements
     if %ERRORLEVEL% neq 0 (
         echo [LOI] Khong the cai Go tu dong.
-        echo   Vui long cai thu cong tai: https://go.dev/dl/
+        echo   Dang mo trang tai ve Go...
+        start https://go.dev/dl/
+        echo.
+        echo  Sau khi cai Go xong, chay lai setup.bat.
         pause
         exit /b 1
     )
@@ -29,11 +32,14 @@ if %ERRORLEVEL% neq 0 (
 ::Kiểm tra Node.js
 where node >nul 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo [...] Node.js chua duoc cai. Dang cai tu dong...
+    echo [...] Node.js chua duoc cai. Dang cai tu dong qua winget...
     winget install -e --id OpenJS.NodeJS.LTS --silent --accept-source-agreements --accept-package-agreements
     if %ERRORLEVEL% neq 0 (
         echo [LOI] Khong the cai Node.js tu dong.
-        echo   Vui long cai thu cong tai: https://nodejs.org/
+        echo   Dang mo trang tai ve Node.js...
+        start https://nodejs.org/
+        echo.
+        echo  Sau khi cai Node.js xong, chay lai setup.bat.
         pause
         exit /b 1
     )
