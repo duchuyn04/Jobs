@@ -1,0 +1,218 @@
+@model JobAggregator.Models.JobResultViewModel
+@using JobAggregator.Models
+@{
+    ViewData["Title"] = "Tìm Kiếm Việc Làm IT";
+    var filter = Model.Filter;
+}
+
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content text-center">
+            <h1 class="hero-title">
+                <span class="gradient-text">Tìm Việc IT</span> Từ 6 Nguồn
+            </h1>
+            <p class="hero-subtitle">Tổng hợp từ TopDev · ITviec · TopCV · JobsGO · JobOKO · Glints</p>
+        </div>
+
+        <!-- Search Form -->
+        <form asp-controller="Job" asp-action="Search" method="get" id="searchForm" class="search-card">
+            <div class="row g-3">
+                <!-- Keyword -->
+                <div class="col-12">
+                    <div class="search-input-wrapper">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text"
+                               name="keyword"
+                               id="keyword"
+                               class="form-control search-input"
+                               placeholder="Nhập vị trí: nodejs, .net, react, java, devops..."
+                               value="@filter.Keyword"
+                               autocomplete="off"
+                               required />
+                        <button type="submit" class="btn btn-search" id="searchBtn">
+                            <span class="btn-text">Tìm kiếm</span>
+                            <span class="spinner-border spinner-border-sm d-none" id="searchSpinner"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Location Chips (luôn hiển thị) -->
+                <div class="col-12">
+                    <div class="location-chips">
+                        <span class="location-label"><i class="bi bi-geo-alt me-1"></i></span>
+                        @foreach (var loc in SearchViewModel.AllLocations)
+                        {
+                            <label class="chip chip-location @(filter.Locations.Contains(loc.Key) ? "chip-active" : "")">
+                                <input type="checkbox" name="locations" value="@loc.Key" @(filter.Locations.Contains(loc.Key) ? "checked" : "") hidden>
+                                @loc.Display
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <!-- Filters Row -->
+                <div class="col-12">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <button class="btn btn-filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filterPanel">
+                            <i class="bi bi-sliders me-1"></i>Bộ lọc nâng cao
+                        </button>
+                        @if (Model.IsLoaded)
+                        {
+                            <span class="result-summary">
+                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                Tìm thấy <strong>@Model.TotalCount</strong> việc làm
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Expanded filters -->
+                <div class="col-12 collapse @(HasFilters(filter) ? "show" : "")" id="filterPanel">
+                    <div class="filter-panel">
+                        <div class="row g-3">
+                            <!-- Level -->
+                            <div class="col-md-4">
+                                <label class="filter-label"><i class="bi bi-bar-chart me-1"></i>Cấp độ</label>
+                                <div class="level-chips">
+                                    @foreach (var lvl in SearchViewModel.AllLevels)
+                                    {
+                                        <label class="chip @(filter.Levels.Contains(lvl) ? "chip-active" : "")">
+                                            <input type="checkbox" name="levels" value="@lvl" @(filter.Levels.Contains(lvl) ? "checked" : "") hidden>
+                                            @lvl.ToUpper()
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Experience -->
+                            <div class="col-md-3">
+                                <label class="filter-label"><i class="bi bi-clock me-1"></i>Kinh nghiệm (năm)</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="number" name="minExp" class="form-control filter-input"
+                                           placeholder="Từ" min="0" max="20" value="@filter.MinExp">
+                                    <span class="text-white-50">–</span>
+                                    <input type="number" name="maxExp" class="form-control filter-input"
+                                           placeholder="Đến" min="0" max="20" value="@filter.MaxExp">
+                                </div>
+                            </div>
+
+                            <!-- Sources -->
+                            <div class="col-md-3">
+                                <label class="filter-label w-100 d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="bi bi-globe me-1"></i>Nguồn</span>
+                                    <a href="#" class="text-white-50 small text-decoration-underline" id="clearSourcesBtn" style="cursor: pointer;">Bỏ chọn hết</a>
+                                </label>
+                                <div class="source-checks">
+                                    @foreach (var src in SearchViewModel.AllSources)
+                                    {
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox"
+                                                   name="sources" value="@src" id="src_@src"
+                                                   @(filter.Sources.Contains(src) || filter.Sources.Count == 0 ? "checked" : "")>
+                                            <label class="form-check-label text-white-50 small" for="src_@src">@src</label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Options -->
+                            <div class="col-md-2">
+                                <label class="filter-label"><i class="bi bi-gear me-1"></i>Tùy chọn</label>
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox"
+                                               name="hideExpired" value="true" id="hideExpired"
+                                               @(filter.HideExpired ? "checked" : "")>
+                                        <label class="form-check-label text-white-50 small" for="hideExpired">Ẩn đã hết hạn</label>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="number" name="minDaysLeft" class="form-control filter-input"
+                                               placeholder="Còn tối thiểu" min="0" value="@filter.MinDaysLeft" style="width:80px">
+                                        <span class="text-white-50 small">ngày</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results Section -->
+<div class="container results-section">
+    @if (!Model.IsLoaded)
+    {
+        <!-- Landing state -->
+        <div class="landing-placeholders">
+            <div class="row g-3">
+                @foreach (var src in SearchViewModel.AllSources)
+                {
+                    <div class="col-md-4 col-sm-6">
+                        <div class="source-card">
+                            <div class="source-icon"><i class="bi bi-bookmark-fill"></i></div>
+                            <div class="source-name">@src</div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="text-center mt-5">
+                <p class="text-white-50">Nhập từ khóa và nhấn <strong class="text-white">Tìm kiếm</strong> để bắt đầu</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Errors -->
+        @if (Model.Errors.Any())
+        {
+            <div class="alert alert-dark border-warning text-warning small py-2 mb-3">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                Một số nguồn không phản hồi: @string.Join(" · ", Model.Errors)
+            </div>
+        }
+
+        <!-- Stats bar -->
+        @if (Model.CountBySource.Any())
+        {
+            <div class="stats-bar mb-4">
+                @foreach (var kv in Model.CountBySource.OrderByDescending(x => x.Value))
+                {
+                    <span class="stat-chip">
+                        <span class="stat-source">@kv.Key</span>
+                        <span class="stat-count">@kv.Value</span>
+                    </span>
+                }
+            </div>
+        }
+
+        @if (!Model.Jobs.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-search display-4 text-white-50"></i>
+                <h3 class="mt-3">Không tìm thấy kết quả</h3>
+                <p class="text-white-50">Thử từ khóa khác hoặc mở rộng bộ lọc</p>
+            </div>
+        }
+        else
+        {
+            <!-- Job Grid -->
+            <div class="row g-3" id="jobGrid">
+                @foreach (var job in Model.Jobs)
+                {
+                    @await Html.PartialAsync("_JobCard", job)
+                }
+            </div>
+
+            <!-- Pagination -->
+            @await Html.PartialAsync("_Pagination", Model)
+        }
+    }
+</div>
+
+@functions {
+    bool HasFilters(SearchViewModel f) =>
+        f.Levels.Count > 0 || f.MinExp.HasValue || f.MaxExp.HasValue
+        || f.Sources.Count > 0 || f.MinDaysLeft.HasValue || f.Locations.Count > 0;
+}

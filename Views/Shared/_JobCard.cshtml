@@ -1,0 +1,88 @@
+@model JobAggregator.Models.JobItem
+@using JobAggregator.Helpers
+
+@{
+    var (badgeLabel, badgeCss) = DeadlineHelper.GetBadge(Model.DaysLeft);
+    var levelColor = Model.Level switch
+    {
+        "intern"  => "lvl-intern",
+        "fresher" => "lvl-fresher",
+        "junior"  => "lvl-junior",
+        "middle"  => "lvl-middle",
+        "senior"  => "lvl-senior",
+        _         => "lvl-unknown",
+    };
+    var sourceIcon = Model.Source switch
+    {
+        "TopDev"  => "bi-code-slash",
+        "ITviec"  => "bi-laptop",
+        "TopCV"   => "bi-file-person",
+        "JobsGO"  => "bi-rocket",
+        "JobOKO"  => "bi-briefcase",
+        "Glints"  => "bi-globe2",
+        _         => "bi-bookmark",
+    };
+}
+
+<div class="col-md-6 col-lg-4">
+    <div class="job-card h-100">
+        <div class="job-card-header">
+            <div class="d-flex align-items-start justify-content-between gap-2">
+                <div class="flex-grow-1 min-w-0">
+                    <a href="@Model.Url" target="_blank" rel="noopener noreferrer" class="job-title-link">
+                        <h5 class="job-title">@Model.Title</h5>
+                    </a>
+                    <div class="job-company">
+                        <i class="bi bi-building me-1"></i>@Model.Company
+                    </div>
+                </div>
+                <span class="source-badge">
+                    <i class="bi @sourceIcon me-1"></i>@Model.Source
+                </span>
+            </div>
+        </div>
+
+        <div class="job-card-body">
+            <div class="job-meta">
+                @if (!string.IsNullOrEmpty(Model.Location))
+                {
+                    <span class="meta-item">
+                        <i class="bi bi-geo-alt"></i>@Model.Location
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(Model.Salary))
+                {
+                    <span class="meta-item meta-salary">
+                        <i class="bi bi-cash-stack"></i>@Model.Salary
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(Model.Experience))
+                {
+                    <span class="meta-item">
+                        <i class="bi bi-clock"></i>@Model.Experience
+                    </span>
+                }
+            </div>
+
+            <div class="d-flex align-items-center gap-2 mt-3 flex-wrap">
+                <span class="level-badge @levelColor">@Model.Level.ToUpper()</span>
+                <span class="deadline-badge @badgeCss">
+                    <i class="bi bi-calendar3 me-1"></i>@badgeLabel
+                </span>
+                @if (Model.PostedDate.HasValue)
+                {
+                    <span class="posted-date">
+                        <i class="bi bi-clock-history me-1"></i>@Model.PostedDate.Value.ToString("dd/MM/yyyy")
+                    </span>
+                }
+            </div>
+        </div>
+
+        <div class="job-card-footer">
+            <a href="@Model.Url" target="_blank" rel="noopener noreferrer"
+               class="btn btn-apply w-100">
+                <i class="bi bi-box-arrow-up-right me-2"></i>Xem & Ứng tuyển
+            </a>
+        </div>
+    </div>
+</div>

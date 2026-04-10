@@ -1,0 +1,18 @@
+# ─── Go ───────────────────────────────────────────
+backend-go/*.exe
+backend-go/out.json
+backend-go/output.json
+backend-go/*.png
+
+# ─── Next.js ──────────────────────────────────────
+frontend/node_modules/
+frontend/.next/
+frontend/.env*.local
+
+# ─── Playwright cache ─────────────────────────────
+out/
+
+# ─── Misc ─────────────────────────────────────────
+scratch/
+wwwroot/
+*.log

@@ -1,0 +1,67 @@
+@model JobAggregator.Models.JobResultViewModel
+@{
+    var f      = Model.Filter;
+    var cur    = f.Page;
+    var total  = Model.TotalPages;
+    if (total <= 1) return;
+
+    // Build query string giữ nguyên tất cả params, chỉ thay page
+    string PageUrl(int p)
+    {
+        var qs = new System.Text.StringBuilder($"/jobs/search?keyword={Uri.EscapeDataString(f.Keyword)}&page={p}&pageSize={f.PageSize}");
+        foreach (var lvl in f.Levels)                qs.Append($"&levels={Uri.EscapeDataString(lvl)}");
+        if (f.MinExp.HasValue)                       qs.Append($"&minExp={f.MinExp}");
+        if (f.MaxExp.HasValue)                       qs.Append($"&maxExp={f.MaxExp}");
+        if (f.HideExpired)                           qs.Append("&hideExpired=true");
+        if (f.MinDaysLeft.HasValue)                  qs.Append($"&minDaysLeft={f.MinDaysLeft}");
+        foreach (var s in f.Sources)                 qs.Append($"&sources={Uri.EscapeDataString(s)}");
+        foreach (var loc in f.Locations)             qs.Append($"&locations={Uri.EscapeDataString(loc)}");
+        return qs.ToString();
+    }
+
+    int start = Math.Max(1, cur - 2);
+    int end   = Math.Min(total, cur + 2);
+}
+
+<nav class="pagination-nav mt-5" aria-label="Phân trang kết quả">
+    <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
+        <!-- Prev -->
+        @if (cur > 1)
+        {
+            <a href="@PageUrl(cur - 1)" class="page-btn page-prev" aria-label="Trang trước">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        }
+
+        <!-- First page -->
+        @if (start > 1)
+        {
+            <a href="@PageUrl(1)" class="page-btn">1</a>
+            @if (start > 2) { <span class="page-ellipsis">…</span> }
+        }
+
+        <!-- Page range -->
+        @for (int p = start; p <= end; p++)
+        {
+            <a href="@PageUrl(p)" class="page-btn @(p == cur ? "page-active" : "")">@p</a>
+        }
+
+        <!-- Last page -->
+        @if (end < total)
+        {
+            @if (end < total - 1) { <span class="page-ellipsis">…</span> }
+            <a href="@PageUrl(total)" class="page-btn">@total</a>
+        }
+
+        <!-- Next -->
+        @if (cur < total)
+        {
+            <a href="@PageUrl(cur + 1)" class="page-btn page-next" aria-label="Trang sau">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        }
+    </div>
+    <div class="text-center mt-2 text-white-50 small">
+        Trang @cur / @total · Tổng @Model.TotalCount kết quả
+    </div>
+</nav>
