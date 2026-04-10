@@ -15,7 +15,7 @@ echo   Job Aggregator - Setup
 echo  ========================================
 echo.
 
-:: ─── Cài Go nếu chưa có ───────────────────────────────────────
+:: Cài Go nếu chưa có
 where go >nul 2>&1
 if %ERRORLEVEL% neq 0 (
     echo [...] Go chua duoc cai. Dang tai va cai tu dong...
@@ -41,7 +41,7 @@ if %ERRORLEVEL% neq 0 (
     echo [OK] Go da co san
 )
 
-:: ─── Cài Node.js nếu chưa có ──────────────────────────────────
+:: Cài Node.js nếu chưa có
 where node >nul 2>&1
 if %ERRORLEVEL% neq 0 (
     echo [...] Node.js chua duoc cai. Dang tai va cai tu dong...
@@ -81,6 +81,17 @@ if not exist "%~dp0frontend\node_modules" (
 ) else (
     echo [OK] Frontend dependencies da co san
 )
+
+::Cài Playwright Chromium nếu chưa có
+echo.
+echo [...] Dang cai Playwright browsers (can thiet de scrape web)...
+cd /d "%~dp0backend-go"
+go run github.com/playwright-community/playwright-go/cmd/playwright install chromium
+if %ERRORLEVEL% neq 0 (
+    echo [LOI] Cai Playwright that bai!
+    pause & exit /b 1
+)
+echo [OK] Playwright browsers da cai xong
 
 ::Tạo Desktop shortcut trỏ về start.bat trong project
 echo.
