@@ -2,6 +2,11 @@
 echo  Starting JobAggregator...
 echo.
 
+echo [0/2] Kiem tra cap nhat moi...
+cd /d "%~dp0"
+git pull
+echo.
+
 echo [1/2] Starting Go backend (port 8080)...
 start "JobAggregator - Backend" cmd /k "cd /d "%~dp0backend-go" && go run ."
 
